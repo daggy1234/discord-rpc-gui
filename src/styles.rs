@@ -6,14 +6,18 @@ impl button::StyleSheet for DiscordRedButton {
         button::Style {
             text_color: Color::WHITE,
             background: Some(iced::Background::Color(iced::Color::from_rgb(
-                238.0, 68.0, 74.0,
+                0.930, 0.266, 0.289,
             ))),
+            border_color: Color::TRANSPARENT,
+            border_radius: 2.0,
             ..button::Style::default()
         }
     }
     fn hovered(&self) -> button::Style {
         button::Style {
-            background: Some(Background::Color(Color::TRANSPARENT)),
+            background: Some(iced::Background::Color(iced::Color::from_rgba(
+                0.930, 0.266, 0.289, 0.3,
+            ))),
             ..self.active()
         }
     }
@@ -25,14 +29,18 @@ impl button::StyleSheet for DiscordGreenButton {
         button::Style {
             text_color: Color::WHITE,
             background: Some(iced::Background::Color(iced::Color::from_rgb(
-                64.0, 164.0, 96.0,
+                0.25, 0.641, 0.275,
             ))),
+            border_color: Color::TRANSPARENT,
+            border_radius: 2.0,
             ..button::Style::default()
         }
     }
     fn hovered(&self) -> button::Style {
         button::Style {
-            background: Some(Background::Color(Color::TRANSPARENT)),
+            background: Some(iced::Background::Color(iced::Color::from_rgba(
+                0.25, 0.641, 0.275, 0.3,
+            ))),
             ..self.active()
         }
     }

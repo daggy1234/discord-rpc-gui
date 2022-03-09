@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 iced = "0.3"
 discord-rich-presence = "0.1.8"
+anyhow = "1.0"
+log = { version="0.4.14", features=["std"] }
+notify-rust = "4.5.6"
