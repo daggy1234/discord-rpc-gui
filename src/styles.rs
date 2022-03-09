@@ -69,6 +69,22 @@ impl button::StyleSheet for DiscordDefaultButton {
     }
 }
 
+pub struct DiscordHiddenButton;
+impl button::StyleSheet for DiscordHiddenButton {
+    fn active(&self) -> button::Style {
+        button::Style {
+            text_color: Color::WHITE,
+            background: Some(iced::Background::Color(iced::Color::TRANSPARENT)),
+            border_color: Color::TRANSPARENT,
+            border_radius: 2.0,
+            ..button::Style::default()
+        }
+    }
+    fn hovered(&self) -> button::Style {
+        button::Style { ..self.active() }
+    }
+}
+
 pub struct DiscordTextInput;
 impl text_input::StyleSheet for DiscordTextInput {
     fn active(&self) -> text_input::Style {
