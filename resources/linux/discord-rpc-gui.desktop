@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Exec=discord-rpc-gui
+Name=discord-rpc-gui
+Icon=discord-rpc-gui
+Categories=Utility;
