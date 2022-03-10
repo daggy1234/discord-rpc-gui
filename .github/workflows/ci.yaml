@@ -20,8 +20,8 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --all --no-default-features --features opengl
-
+          args: --all
+          
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest

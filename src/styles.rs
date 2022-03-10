@@ -93,7 +93,6 @@ impl text_input::StyleSheet for DiscordTextInput {
             border_width: 2.0,
             border_radius: 3.0,
             border_color: Color::from_rgba(0.0, 0.0, 0.0, 0.3),
-            ..text_input::Style::default()
         }
     }
 

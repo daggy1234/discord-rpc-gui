@@ -13,10 +13,7 @@ pub fn main() -> iced::Result {
     Counter::run(Settings::default())
 }
 
-use styles::{
-    DiscordDefaultButton, DiscordGreenButton, DiscordHiddenButton, DiscordRedButton,
-    DiscordTextInput,
-};
+use styles::{DiscordDefaultButton, DiscordGreenButton, DiscordRedButton, DiscordTextInput};
 
 #[derive(Default)]
 struct ClientIdState {
@@ -96,11 +93,13 @@ struct StartStopButtonState {
     stop_state: button::State,
 }
 
+#[allow(dead_code)]
 struct ThreadHandling {
     tb: std::thread::Builder,
     joiner: Option<std::thread::JoinHandle<()>>,
 }
 
+#[allow(dead_code)]
 struct Counter {
     client_id: ClientIdState,
     client_id_valid: ClientIdValidState,
@@ -248,13 +247,7 @@ impl Application for Counter {
                 let add_button_b = self.buttonb.buttonb_valid;
                 let showbb = self.buttonb.buttonb_show;
                 let can_start = match self.stspbs.status {
-                    Some(v) => {
-                        if v {
-                            false
-                        } else {
-                            true
-                        }
-                    }
+                    Some(v) => !v,
                     None => true,
                 };
 
@@ -301,38 +294,35 @@ impl Application for Counter {
                             let mut buttons: Vec<activity::Button> = Vec::new();
                             let mut add_buts = false;
                             if let Some(state) = &rpc_data.state_value {
-                                act = act.state(&state);
+                                act = act.state(state);
                             }
                             if let Some(details) = &rpc_data.details_value {
-                                act = act.details(&details);
+                                act = act.details(details);
                             }
                             if let Some(s_key) = &rpc_data.small_image_key {
                                 add_assets = true;
-                                assets = assets.small_image(&s_key);
+                                assets = assets.small_image(s_key);
                             }
                             if let Some(s_text) = &rpc_data.small_image_text {
                                 add_assets = true;
-                                assets = assets.small_text(&s_text);
+                                assets = assets.small_text(s_text);
                             }
                             if let Some(l_key) = &rpc_data.large_image_key {
                                 add_assets = true;
                                 println!("Lagre image {}", l_key);
-                                assets = assets.large_image(&l_key);
+                                assets = assets.large_image(l_key);
                             }
                             if let Some(l_text) = &rpc_data.large_image_text {
                                 add_assets = true;
                                 println!("Lagre image Text {}", l_text);
-                                assets = assets.large_text(&l_text);
+                                assets = assets.large_text(l_text);
                             }
                             if let Some(ba_te) = &rpc_data.button_a_text {
                                 if let Some(ba_url) = &rpc_data.button_a_url {
                                     if add_button_a {
                                         add_buts = true;
-                                        println!(
-                                            "{}",
-                                            format!("Add Buttons {}  {}", ba_te, ba_url)
-                                        );
-                                        buttons.push(activity::Button::new(&ba_te, &ba_url));
+                                        println!("Add buttons {} {}", ba_te, ba_url);
+                                        buttons.push(activity::Button::new(ba_te, ba_url));
                                     }
                                 }
                             }
@@ -340,11 +330,8 @@ impl Application for Counter {
                                 if let Some(bb_url) = &rpc_data.button_b_url {
                                     if add_button_b {
                                         add_buts = true;
-                                        println!(
-                                            "{}",
-                                            format!("Add Buttons B {}  {}", bb_te, bb_url)
-                                        );
-                                        buttons.push(activity::Button::new(&bb_te, &bb_url));
+                                        println!("Add buttons B {} {}", bb_te, bb_url);
+                                        buttons.push(activity::Button::new(bb_te, bb_url));
                                     }
                                 }
                             }
@@ -383,16 +370,7 @@ impl Application for Counter {
             }
             Message::StopRpcServer => {
                 println!("TRY STOP");
-                let can_stop = match self.stspbs.status {
-                    Some(v) => {
-                        if v {
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                    None => false,
-                };
+                let can_stop = self.stspbs.status.unwrap_or(false);
                 if can_stop {
                     self.stspbs.status = Some(false);
                     match Arc::clone(&self.dipc).lock() {
@@ -597,7 +575,7 @@ impl Application for Counter {
                             TextInput::new(
                                 &mut smallimgd.small_image_key,
                                 "Small Image Key.",
-                                &acd_data_data
+                                acd_data_data
                                     .small_image_key
                                     .as_ref()
                                     .unwrap_or(&"".to_string()),
@@ -613,7 +591,7 @@ impl Application for Counter {
                             TextInput::new(
                                 &mut smallimgd.small_image_text,
                                 "Small Image Text.",
-                                &acd_data_data
+                                acd_data_data
                                     .small_image_text
                                     .as_ref()
                                     .unwrap_or(&"".to_string()),
@@ -652,7 +630,7 @@ impl Application for Counter {
                             TextInput::new(
                                 &mut largeimgd.large_image_key,
                                 "Large Image Key.",
-                                &acd_data_data
+                                acd_data_data
                                     .large_image_key
                                     .as_ref()
                                     .unwrap_or(&"".to_string()),
@@ -668,7 +646,7 @@ impl Application for Counter {
                             TextInput::new(
                                 &mut largeimgd.large_image_text,
                                 "Large Image Text.",
-                                &acd_data_data
+                                acd_data_data
                                     .large_image_text
                                     .as_ref()
                                     .unwrap_or(&"".to_string()),
@@ -874,7 +852,7 @@ impl Application for Counter {
                                                 TextInput::new(
                                                     &mut acd_data.state_state,
                                                     "Activity State",
-                                                    &acd_data_data
+                                                    acd_data_data
                                                         .state_value
                                                         .as_ref()
                                                         .unwrap_or(&"".to_string()),
@@ -902,7 +880,7 @@ impl Application for Counter {
                                                 TextInput::new(
                                                     &mut acd_data.details_state,
                                                     "Activity Details",
-                                                    &acd_data_data
+                                                    acd_data_data
                                                         .details_value
                                                         .as_ref()
                                                         .unwrap_or(&"".to_string()),
