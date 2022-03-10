@@ -129,10 +129,18 @@ enum Message {
     RpcDataSmallImageUpdate(String),
     RpcDataLargeTextUpdate(String),
     RpcDataLargeImageUpdate(String),
+    RpcDataLargeButtonATextUpdate(String),
+    RpcDataLargeButtonAUrlUpdate(String),
+    RpcDataLargeButtonBTextUpdate(String),
+    RpcDataLargeButtonBUrlUpdate(String),
     SmallImgShowUpdate,
     SmallImgHideUpdate,
     LargeImgShowUpdate,
     LargeImgHideUpdate,
+    ButtonAShowUpdate,
+    ButtonAHideUpdate,
+    ButtonBShowUpdate,
+    ButtonBHideUpdate,
 }
 
 // fn get_cvv_styl(stat: Option<bool>) -> button::StyleSheet {
@@ -235,6 +243,10 @@ impl Application for Counter {
             }
             Message::StartRpcServer => {
                 let vca = self.client_id.valid;
+                let add_button_a = self.buttona.buttona_valid;
+                let showba = self.buttona.buttona_show;
+                let add_button_b = self.buttonb.buttonb_valid;
+                let showbb = self.buttonb.buttonb_show;
                 let can_start = match self.stspbs.status {
                     Some(v) => {
                         if v {
@@ -245,6 +257,23 @@ impl Application for Counter {
                     }
                     None => true,
                 };
+
+                if !add_button_a && showba {
+                    Notification::new()
+                        .summary("Discord-RPC-GUI")
+                        .body("The RPC will start without Button A, for the button config is invalid.")
+                        .show()
+                        .unwrap();
+                };
+
+                if !add_button_b && showbb {
+                    Notification::new()
+                        .summary("Discord-RPC-GUI")
+                        .body("The RPC will start without Button B, for the button config is invalid.")
+                        .show()
+                        .unwrap();
+                };
+
                 if can_start && vca {
                     let parec = Arc::clone(&self.dipc);
                     let rpc_data_d = Arc::clone(&self.data);
@@ -269,6 +298,8 @@ impl Application for Counter {
                             let mut act = activity::Activity::new();
                             let mut assets = activity::Assets::new();
                             let mut add_assets = false;
+                            let mut buttons: Vec<activity::Button> = Vec::new();
+                            let mut add_buts = false;
                             if let Some(state) = &rpc_data.state_value {
                                 act = act.state(&state);
                             }
@@ -285,14 +316,43 @@ impl Application for Counter {
                             }
                             if let Some(l_key) = &rpc_data.large_image_key {
                                 add_assets = true;
+                                println!("Lagre image {}", l_key);
                                 assets = assets.large_image(&l_key);
                             }
                             if let Some(l_text) = &rpc_data.large_image_text {
                                 add_assets = true;
+                                println!("Lagre image Text {}", l_text);
                                 assets = assets.large_text(&l_text);
+                            }
+                            if let Some(ba_te) = &rpc_data.button_a_text {
+                                if let Some(ba_url) = &rpc_data.button_a_url {
+                                    if add_button_a {
+                                        add_buts = true;
+                                        println!(
+                                            "{}",
+                                            format!("Add Buttons {}  {}", ba_te, ba_url)
+                                        );
+                                        buttons.push(activity::Button::new(&ba_te, &ba_url));
+                                    }
+                                }
+                            }
+                            if let Some(bb_te) = &rpc_data.button_b_text {
+                                if let Some(bb_url) = &rpc_data.button_b_url {
+                                    if add_button_b {
+                                        add_buts = true;
+                                        println!(
+                                            "{}",
+                                            format!("Add Buttons B {}  {}", bb_te, bb_url)
+                                        );
+                                        buttons.push(activity::Button::new(&bb_te, &bb_url));
+                                    }
+                                }
                             }
                             if add_assets {
                                 act = act.assets(assets);
+                            }
+                            if add_buts {
+                                act = act.buttons(buttons);
                             }
                             match c.set_activity(act) {
                                 Ok(_a) => println!("Set Activity"),
@@ -425,6 +485,26 @@ impl Application for Counter {
                 let mut vals = vals_a.lock().unwrap();
                 vals.large_image_text = Some(v);
             }
+            Message::RpcDataLargeButtonATextUpdate(v) => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                vals.button_a_text = Some(v);
+            }
+            Message::RpcDataLargeButtonAUrlUpdate(v) => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                vals.button_a_url = Some(v);
+            }
+            Message::RpcDataLargeButtonBTextUpdate(v) => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                vals.button_b_text = Some(v);
+            }
+            Message::RpcDataLargeButtonBUrlUpdate(v) => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                vals.button_b_url = Some(v);
+            }
             Message::LargeImgShowUpdate => {
                 let vals_a = Arc::clone(&self.data);
                 let mut vals = vals_a.lock().unwrap();
@@ -439,6 +519,34 @@ impl Application for Counter {
                 vals.large_image_key = None;
                 vals.large_image_text = None;
             }
+            Message::ButtonAShowUpdate => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                self.buttona.buttona_show = true;
+                vals.button_a_text = None;
+                vals.button_a_url = None;
+            }
+            Message::ButtonAHideUpdate => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                self.buttona.buttona_show = false;
+                vals.button_b_text = None;
+                vals.button_b_url = None;
+            }
+            Message::ButtonBShowUpdate => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                self.buttonb.buttonb_show = true;
+                vals.button_b_text = None;
+                vals.button_b_url = None;
+            }
+            Message::ButtonBHideUpdate => {
+                let vals_a = Arc::clone(&self.data);
+                let mut vals = vals_a.lock().unwrap();
+                self.buttonb.buttonb_show = false;
+                vals.button_b_text = None;
+                vals.button_b_url = None;
+            }
         };
         Command::none()
     }
@@ -449,6 +557,8 @@ impl Application for Counter {
         let acd_data = &mut self.dat_state;
         let smallimgd = &mut self.smallimg;
         let largeimgd = &mut self.largeimg;
+        let buttona = &mut self.buttona;
+        let buttonb = &mut self.buttonb;
         let acd_data_arc = Arc::clone(&self.data);
         let acd_data_data = acd_data_arc.lock().unwrap();
 
@@ -578,6 +688,143 @@ impl Application for Counter {
             ),
         };
 
+        let buttona_text_val = &acd_data_data.button_a_text;
+        let buttona_url_val = &acd_data_data.button_a_url;
+        buttona.buttona_valid = false;
+        let mut batext =
+            Text::new("Invalid Button A. Both Text and url must exist.").color(Color::WHITE);
+        if let Some(bav) = buttona_text_val {
+            if let Some(bau) = buttona_url_val {
+                if bau.len() > 1 && bav.len() > 1 {
+                    batext = match url::Url::parse(bau) {
+                        Ok(_u) => {
+                            buttona.buttona_valid = true;
+                            Text::new("Valid Button Entered").color(Color::from_rgb(0.0, 1.0, 0.0))
+                        }
+                        Err(_e) => Text::new("Valid Button Text, bad Button URL")
+                            .color(Color::from_rgb(1.0, 0.0, 0.0)),
+                    };
+                } else {
+                    batext = Text::new("InValid Button Entered. Please enter text inside")
+                        .color(Color::from_rgb(1.0, 0.0, 0.0));
+                }
+            }
+        };
+
+        let buttonb_text_val = &acd_data_data.button_b_text;
+        let buttonb_url_val = &acd_data_data.button_b_url;
+        buttonb.buttonb_valid = false;
+        let mut bbtext =
+            Text::new("Invalid Button B. Both Text and url must exist.").color(Color::WHITE);
+        if let Some(bbv) = buttonb_text_val {
+            if let Some(bbu) = buttonb_url_val {
+                if bbu.len() > 1 && bbv.len() > 1 {
+                    bbtext = match url::Url::parse(bbu) {
+                        Ok(_u) => {
+                            buttonb.buttonb_valid = true;
+                            Text::new("Valid Button B Entered")
+                                .color(Color::from_rgb(0.0, 1.0, 0.0))
+                        }
+                        Err(_e) => Text::new("Valid Button B Text, bad Button B URL")
+                            .color(Color::from_rgb(1.0, 0.0, 0.0)),
+                    };
+                } else {
+                    bbtext = Text::new("InValid Button B Entered. Please enter text inside")
+                        .color(Color::from_rgb(1.0, 0.0, 0.0));
+                }
+            }
+        };
+
+        let button_a_portion = match buttona.buttona_show {
+            true => Column::new()
+                .push(
+                    Button::new(&mut buttona.buttona_hide_button, Text::new("- Button A"))
+                        .padding(5)
+                        .on_press(Message::ButtonAHideUpdate),
+                )
+                .push(Space::with_height(iced::Length::Units(40)))
+                .push(
+                    Row::new()
+                        .push(Text::new("Button Text").color(Color::WHITE).size(25))
+                        .push(Space::with_width(iced::Length::Units(20)))
+                        .push(
+                            TextInput::new(
+                                &mut buttona.buttona_text,
+                                "Button Text",
+                                buttona_text_val.as_ref().unwrap_or(&"".to_string()),
+                                Message::RpcDataLargeButtonATextUpdate,
+                            )
+                            .style(DiscordTextInput)
+                            .padding(15),
+                        )
+                        .push(Space::with_height(iced::Length::Units(60)))
+                        .push(Text::new("Image Text").color(Color::WHITE).size(25))
+                        .push(Space::with_width(iced::Length::Units(20)))
+                        .push(
+                            TextInput::new(
+                                &mut buttona.buttona_url,
+                                "Button Url",
+                                buttona_url_val.as_ref().unwrap_or(&"".to_string()),
+                                Message::RpcDataLargeButtonAUrlUpdate,
+                            )
+                            .style(DiscordTextInput)
+                            .padding(15),
+                        ),
+                )
+                .push(Space::with_height(iced::Length::Units(20)))
+                .push(batext),
+            false => Column::new().push(
+                Button::new(&mut buttona.buttona_show_button, Text::new("+ Button A"))
+                    .padding(5)
+                    .on_press(Message::ButtonAShowUpdate),
+            ),
+        };
+
+        let button_b_portion = match buttonb.buttonb_show {
+            true => Column::new()
+                .push(
+                    Button::new(&mut buttonb.buttonb_hide_button, Text::new("- Button B"))
+                        .padding(5)
+                        .on_press(Message::ButtonBHideUpdate),
+                )
+                .push(Space::with_height(iced::Length::Units(40)))
+                .push(
+                    Row::new()
+                        .push(Text::new("Button Text").color(Color::WHITE).size(25))
+                        .push(Space::with_width(iced::Length::Units(20)))
+                        .push(
+                            TextInput::new(
+                                &mut buttonb.buttonb_text,
+                                "Button Text",
+                                buttonb_text_val.as_ref().unwrap_or(&"".to_string()),
+                                Message::RpcDataLargeButtonBTextUpdate,
+                            )
+                            .style(DiscordTextInput)
+                            .padding(15),
+                        )
+                        .push(Space::with_height(iced::Length::Units(60)))
+                        .push(Text::new("Image Text").color(Color::WHITE).size(25))
+                        .push(Space::with_width(iced::Length::Units(20)))
+                        .push(
+                            TextInput::new(
+                                &mut buttonb.buttonb_url,
+                                "Button Url",
+                                buttonb_url_val.as_ref().unwrap_or(&"".to_string()),
+                                Message::RpcDataLargeButtonBUrlUpdate,
+                            )
+                            .style(DiscordTextInput)
+                            .padding(15),
+                        ),
+                )
+                .push(Space::with_height(iced::Length::Units(20)))
+                .push(bbtext),
+            false => Column::new().push(
+                Button::new(&mut buttonb.buttonb_show_button, Text::new("+ Button B"))
+                    .padding(5)
+                    .on_press(Message::ButtonBShowUpdate),
+            ),
+        };
+
         Scrollable::new(&mut self.scroll_state)
             .push(
                 Column::new()
@@ -672,6 +919,10 @@ impl Application for Counter {
                     .push(small_img_portion)
                     .push(Space::with_height(iced::Length::Units(40)))
                     .push(large_img_portion)
+                    .push(Space::with_height(iced::Length::Units(40)))
+                    .push(button_a_portion)
+                    .push(Space::with_height(iced::Length::Units(40)))
+                    .push(button_b_portion)
                     .push(Space::with_height(iced::Length::Units(40)))
                     .push(
                         Row::new()
