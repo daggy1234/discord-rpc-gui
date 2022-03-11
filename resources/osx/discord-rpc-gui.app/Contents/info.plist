@@ -28,8 +28,6 @@
   <true/>
   <key>NSMainNibFile</key>
   <string></string>
-  <key>NSSupportsAutomaticGraphicsSwitching</key>
-  <true/>
   <key>CFBundleDisplayName</key>
   <string>discord-rpc-gui</string>
   <key>NSRequiresAquaSystemAppearance</key>
